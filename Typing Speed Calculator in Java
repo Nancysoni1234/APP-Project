@@ -1,0 +1,75 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.Duration;
+import java.time.Instant;
+
+public class TypingSpeedCalculator extends JFrame {
+    private JTextArea textArea;
+    private JTextField inputField;
+    private JButton startButton;
+    private JLabel wpmLabel;
+    private Instant startTime;
+    private String testSentence = "The quick brown fox jumps over the lazy dog";
+
+    public TypingSpeedCalculator() {
+        setTitle("Typing Speed Calculator");
+        setSize(600, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        textArea = new JTextArea(testSentence);
+        textArea.setWrapStyleWord(true);
+        textArea.setLineWrap(true);
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Serif", Font.PLAIN, 24));
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+
+        inputField = new JTextField();
+        inputField.setFont(new Font("Serif", Font.PLAIN, 24));
+        inputField.setEnabled(false);
+        inputField.addActionListener(new InputListener());
+        add(inputField, BorderLayout.SOUTH);
+
+        startButton = new JButton("Start");
+        startButton.addActionListener(new StartButtonListener());
+        add(startButton, BorderLayout.NORTH);
+
+        wpmLabel = new JLabel("WPM: 0");
+        wpmLabel.setFont(new Font("Serif", Font.BOLD, 24));
+        wpmLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        add(wpmLabel, BorderLayout.EAST);
+
+        setVisible(true);
+    }
+
+    private class StartButtonListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            inputField.setText("");
+            inputField.setEnabled(true);
+            inputField.requestFocus();
+            startTime = Instant.now();
+            wpmLabel.setText("WPM: 0");
+        }
+    }
+
+    private class InputListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String typedText = inputField.getText();
+            if (typedText.equals(testSentence)) {
+                Instant endTime = Instant.now();
+                Duration timeTaken = Duration.between(startTime, endTime);
+                long seconds = timeTaken.getSeconds();
+                int wordCount = testSentence.split(" ").length;
+                double wpm = (wordCount / (seconds / 60.0));
+                wpmLabel.setText(String.format("WPM: %.2f", wpm));
+                inputField.setEnabled(false);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(TypingSpeedCalculator::new);
+    }
+}
